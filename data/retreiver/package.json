@@ -1,0 +1,14 @@
+{
+  "name": "retreiver",
+  "version": "0.0.1",
+  "description": "Data retreival script(s) for analyzing the impact of rainfall on load shedding and AQI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dardaul Hoque <bsse1126@iit.du.ac.bd>",
+  "license": "MIT",
+  "dependencies": {
+    "node-html-parser": "^6.1.10"
+  }
+}
