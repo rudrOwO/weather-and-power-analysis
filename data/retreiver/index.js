@@ -1,10 +1,10 @@
+import { argv } from "process"
 import { retreivePowerData } from "./power.js"
-const elements = await retreivePowerData("1")
 
-console.log(elements.length)
+const [_, __, area, fromDate, toDate] = argv
+
+const elements = await retreivePowerData(area, fromDate, toDate)
 
 for (let i = 3; i < elements.length; i++) {
   console.log(elements[i].textContent + ", ")
 }
-
-console.log(process.argv)

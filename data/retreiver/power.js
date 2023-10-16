@@ -13,22 +13,22 @@ export const areaCodesToNames = {
 }
 
 export const namesToAreaCodes = {
-  dhaka: 1,
-  chittagong: 2,
-  khulna: 3,
-  rajshahi: 4,
-  comilla: 5,
-  mymensingh: 6,
-  sylhet: 7,
-  barisal: 8,
-  rangpur: 9,
+  dhaka: "1",
+  chittagong: "2",
+  khulna: "3",
+  rajshahi: "4",
+  comilla: "5",
+  mymensingh: "6",
+  sylhet: "7",
+  barisal: "8",
+  rangpur: "9",
 }
 
-export const retreivePowerData = async (areaCode) => {
+export const retreivePowerData = async (area, fromDate, toDate) => {
   const payload = new FormData()
-  payload.append("area", areaCode)
-  payload.append("from_date", "01/01/2013")
-  payload.append("to_date", "03/01/2013")
+  payload.append("area", namesToAreaCodes[area])
+  payload.append("from_date", fromDate)
+  payload.append("to_date", toDate)
 
   const response = await fetch(
     "http://119.40.95.168/bpdb/index.php/area_wise_demand_search",
