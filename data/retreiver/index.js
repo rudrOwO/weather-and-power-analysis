@@ -49,7 +49,7 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
     }
   }
 
-  const header = "date,demand,loadShed,rainfall,apparent_temperature\n"
+  const header = "date,power_demand,load_shed,rainfall,mean_apparent_temperature\n"
   const rows = combinedRecords.map((record) => {
     return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.apparent_temperature}\n`
   })
