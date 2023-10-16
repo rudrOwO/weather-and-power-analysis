@@ -1,3 +1,5 @@
+import { reformatDate } from "./utils.js"
+
 export const coordinates = {
   dhaka: {
     latitute: 23.7104,
@@ -35,4 +37,29 @@ export const coordinates = {
     latitute: 25.7466,
     longitude: 89.2517,
   },
+}
+
+/**
+ * Represents a single rainfall stat.
+ * @typedef {Object} RainSum
+ * @property {string} value - The rain sum in millimeters.
+ */
+
+/**
+ * Represents daily rainfall statistics.
+ * @typedef {Object} DailyRainfall
+ * @property {string[]} time - Array of dates in the form YYYY-MM-DD.
+ * @property {RainSum[]} rain_sum - Array of rainfalls.
+ */
+
+/**
+ * @returns {Promise<DailyRainfall>} The book object.
+ */
+export const retreiveDailyRainfall = async (area, fromDate, toDate) => {
+  fromDate = reformatDate(fromDate)
+  toDate = reformatDate(toDate)
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=rain_sum&timezone=auto`
+  const response = await fetch(url)
+  const { daily } = await response.json()
+  return daily
 }

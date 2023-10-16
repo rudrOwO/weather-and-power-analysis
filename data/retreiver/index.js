@@ -1,4 +1,5 @@
 import { retreiveDailyPowerStats } from "./power.js"
+import { retreiveDailyRainfall } from "./rain.js"
 import { namesToAreaCodes } from "./power.js"
 const [_, __, area, fromDate, toDate] = process.argv
 
@@ -13,6 +14,14 @@ if (namesToAreaCodes[area] === undefined) {
   process.exit(1)
 }
 
-const elements = await retreiveDailyPowerStats(area, fromDate, toDate)
+// const elements = await retreiveDailyPowerStats(area, fromDate, toDate)
+const daily = await retreiveDailyRainfall(area, fromDate, toDate)
 
-console.log(JSON.stringify(elements, null, 2))
+const combineRainfallWithPower = async (area, fromDate, toDate) => {
+  const [powerStats, rainfallStats] = await Promise.all([
+    retreiveDailyPowerStats(area, fromDate, toDate),
+    retreiveDailyRainfall(area, fromDate, toDate),
+  ])
+}
+
+console.log(JSON.stringify(daily, null, 2))

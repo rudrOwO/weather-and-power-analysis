@@ -13,6 +13,17 @@ export const namesToAreaCodes = {
   rangpur: "9",
 }
 
+/**
+ * Represents daily power statistics.
+ * @typedef {Object} DailyPowerStats
+ * @property {string} date - The date in the format DD/MM/YYYY.
+ * @property {string} demand - The demand in megawatts.
+ * @property {string} loadShed - The load shedding in megawatts.
+ */
+
+/**
+ * @returns {Promise<DailyPowerStats[]>} The book object.
+ */
 export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   const payload = new FormData()
   payload.append("area", namesToAreaCodes[area])
@@ -29,7 +40,6 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
 
   const html = await response.text()
   const tableData = parse(html).getElementsByTagName("td")
-
   const records = []
 
   for (let i = 3; i < tableData.length; i += 7) {
