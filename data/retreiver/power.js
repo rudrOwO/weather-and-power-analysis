@@ -1,16 +1,5 @@
 import { parse } from "node-html-parser"
-
-export const areaCodesToNames = {
-  1: "dhaka",
-  2: "chittagong",
-  3: "khulna",
-  4: "rajshahi",
-  5: "comilla",
-  6: "mymensingh",
-  7: "sylhet",
-  8: "barisal",
-  9: "rangpur",
-}
+import { reformatDate } from "./utils.js"
 
 export const namesToAreaCodes = {
   dhaka: "1",
@@ -24,7 +13,7 @@ export const namesToAreaCodes = {
   rangpur: "9",
 }
 
-export const retreivePowerData = async (area, fromDate, toDate) => {
+export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   const payload = new FormData()
   payload.append("area", namesToAreaCodes[area])
   payload.append("from_date", fromDate)
@@ -38,7 +27,19 @@ export const retreivePowerData = async (area, fromDate, toDate) => {
     }
   )
 
-  const html = "<div>" + (await response.text()) + "</div>"
-  const node = parse(html)
-  return node.getElementsByTagName("td")
+  const html = await response.text()
+  const tableData = parse(html).getElementsByTagName("td")
+
+  const records = []
+
+  for (let i = 3; i < tableData.length; i += 7) {
+    const date = reformatDate(tableData[i].textContent.substring(24, 34))
+    const demand = tableData[i + 2].textContent
+    const loadShed = tableData[i + 3].textContent
+
+    records.push({ date, demand, loadShed })
+  }
+
+  records.sort((a, b) => (a.date > b.date ? 1 : -1))
+  return records
 }
