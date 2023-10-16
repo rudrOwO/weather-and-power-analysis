@@ -1,6 +1,5 @@
 import { parse } from "node-html-parser"
 import { reformatDate } from "./utils.js"
-import { reformatDate } from "./utils.js"
 
 export const namesToAreaCodes = {
   dhaka: "1",
@@ -100,14 +99,5 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=apparent_temperature_mean,rain_sum&timezone=auto`
   const response = await fetch(url)
   const { daily } = await response.json()
-
-  // sanitize
-  for (let i = 0; i < daily.time.length; i++) {
-    if (daily.apparent_temperature_mean[i] instanceof Object) {
-      daily.apparent_temperature_mean[i] = daily.apparent_temperature_mean[i].value.slice(0, -1)
-    }
-    daily.rain_sum[i] = daily.rain_sum[i].value.slice(0, -1)
-  }
-
   return daily
 }

@@ -1,8 +1,5 @@
 import { guardAgainstInvalidInputs } from "./utils.js"
-import {
-  retreiveDailyPowerStats,
-  retreiveDailyWeather,
-} from "./weather-power.js"
+import { retreiveDailyPowerStats, retreiveDailyWeather } from "./weather-power.js"
 
 const [_, __, area, fromDate, toDate] = process.argv
 guardAgainstInvalidInputs(area, fromDate, toDate)
@@ -13,7 +10,7 @@ guardAgainstInvalidInputs(area, fromDate, toDate)
  * @property {string} demand
  * @property {string} loadShed
  * @property {string} rainfall
- * @property {string} temperature
+ * @property {string} apparent_temperature
  */
 /**
  * @param {string} fromDate is in the format DD/MM/YYYY.
@@ -26,19 +23,35 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
     retreiveDailyWeather(area, fromDate, toDate),
   ])
 
-  const combinedRecords = []
   const len = weatherStats.time.length
+  const combinedRecords = new Array(len)
+
   for (let i = 0; i < len; i++) {
-    while (powerStats[i].date !== weatherStats.time[i]) {
-      i++
+    // Handling missing rows in the power stats.
+    // if (powerStats[i].date > weatherStats.time[i]) {
+    //   const nextSynchedDate = powerStats[i].date
+    //   while (nextSynchedDate > weatherStats.time[i]) {
+    //     combinedRecords[i] = {
+    //       date: weatherStats.time[i],
+    //       demand: "",
+    //       loadShed: "",
+    //       rainfall: weatherStats.rain_sum[i],
+    //       apparent_temperature: weatherStats.apparent_temperature_mean[i],
+    //     }
+    //     i++
+    //   }
+    // }
+
+    combinedRecords[i] = {
+      date: weatherStats.time[i],
+      demand: powerStats[i].demand,
+      loadShed: powerStats[i].loadShed,
+      rainfall: weatherStats.rain_sum[i],
+      apparent_temperature: weatherStats.apparent_temperature_mean[i],
     }
   }
+
+  return combinedRecords
 }
 
-console.log(
-  JSON.stringify(
-    await combineWeatherWithPower(area, fromDate, toDate),
-    null,
-    2
-  )
-)
+console.log(JSON.stringify(await combineWeatherWithPower(area, fromDate, toDate), null, 2))
