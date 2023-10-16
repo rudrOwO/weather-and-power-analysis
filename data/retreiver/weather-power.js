@@ -68,6 +68,8 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
     body: payload,
   })
 
+  console.log("Power Board Server response status: ", response.status)
+
   const html = await response.text()
   const tableData = parse(html).getElementsByTagName("td")
   const records = []
@@ -98,6 +100,9 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
   toDate = reformatDate(toDate)
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=apparent_temperature_mean,rain_sum&timezone=auto`
   const response = await fetch(url)
+
+  console.log("Open Meteo API response status: ", response.status)
+
   const { daily } = await response.json()
   return daily
 }

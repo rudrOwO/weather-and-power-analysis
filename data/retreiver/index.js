@@ -1,4 +1,5 @@
-import { guardAgainstInvalidInputs } from "./utils.js"
+import { writeFileSync } from "fs"
+import { guardAgainstInvalidInputs, reformatDate } from "./utils.js"
 import { retreiveDailyPowerStats, retreiveDailyWeather } from "./weather-power.js"
 
 const [_, __, area, fromDate, toDate] = process.argv
@@ -26,32 +27,37 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
   const len = weatherStats.time.length
   const combinedRecords = new Array(len)
 
-  for (let i = 0; i < len; i++) {
-    // Handling missing rows in the power stats.
-    // if (powerStats[i].date > weatherStats.time[i]) {
-    //   const nextSynchedDate = powerStats[i].date
-    //   while (nextSynchedDate > weatherStats.time[i]) {
-    //     combinedRecords[i] = {
-    //       date: weatherStats.time[i],
-    //       demand: "",
-    //       loadShed: "",
-    //       rainfall: weatherStats.rain_sum[i],
-    //       apparent_temperature: weatherStats.apparent_temperature_mean[i],
-    //     }
-    //     i++
-    //   }
-    // }
-
-    combinedRecords[i] = {
-      date: weatherStats.time[i],
-      demand: powerStats[i].demand,
-      loadShed: powerStats[i].loadShed,
-      rainfall: weatherStats.rain_sum[i],
-      apparent_temperature: weatherStats.apparent_temperature_mean[i],
+  for (let i = 0, j = 0; i < len; i++) {
+    if (powerStats[j].date === weatherStats.time[i]) {
+      combinedRecords[i] = {
+        date: weatherStats.time[i],
+        demand: powerStats[j].demand,
+        loadShed: powerStats[j].loadShed,
+        rainfall: weatherStats.rain_sum[i],
+        apparent_temperature: weatherStats.apparent_temperature_mean[i],
+      }
+      j++
+    } else {
+      console.log("Missing power stats for: ", weatherStats.time[i])
+      combinedRecords[i] = {
+        date: weatherStats.time[i],
+        demand: "",
+        loadShed: "",
+        rainfall: weatherStats.rain_sum[i],
+        apparent_temperature: weatherStats.apparent_temperature_mean[i],
+      }
     }
   }
 
-  return combinedRecords
+  const header = "date,demand,loadShed,rainfall,apparent_temperature\n"
+  const rows = combinedRecords.map((record) => {
+    return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.apparent_temperature}\n`
+  })
+  const csv = header + rows.join("")
+  writeFileSync(
+    `../daily-weather-power/${area}/${reformatDate(fromDate)}-${reformatDate(toDate)}.csv`,
+    csv
+  )
 }
 
-console.log(JSON.stringify(await combineWeatherWithPower(area, fromDate, toDate), null, 2))
+combineWeatherWithPower(area, fromDate, toDate)
