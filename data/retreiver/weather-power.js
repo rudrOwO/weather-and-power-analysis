@@ -55,13 +55,7 @@ export const coordinates = {
 
 /**
  * Represents daily power statistics.
- * @typedef {Object} DailyPowerStats
- * @property {string} date - The date in the format YYYY-MM-DD.
- * @property {string} demand - The demand in megawatts.
- * @property {string} loadShed - The load shedding in megawatts.
- */
-
-/**
+ * @typedef {{date: string, demand: string, loadShed: string}} DailyPowerStats
  * @returns {Promise<DailyPowerStats[]>} The daily power statistics.
  */
 export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
@@ -70,13 +64,10 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   payload.append("from_date", fromDate)
   payload.append("to_date", toDate)
 
-  const response = await fetch(
-    "http://119.40.95.168/bpdb/index.php/area_wise_demand_search",
-    {
-      method: "POST",
-      body: payload,
-    }
-  )
+  const response = await fetch("http://119.40.95.168/bpdb/index.php/area_wise_demand_search", {
+    method: "POST",
+    body: payload,
+  })
 
   const html = await response.text()
   const tableData = parse(html).getElementsByTagName("td")
@@ -95,19 +86,12 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
 }
 
 /**
- * Represents a single weather stat.
- * @typedef {{value: string}} WeatherValue - The measure of the weather variable in question (apparent temperature or rainfall).
- */
-
-/**
- * Represents daily rainfall statistics.
- * @typedef {Object} DailyWeather
+ * @typedef {Object} DailyWeather - Represents daily rainfall statistics.
  * @property {string[]} time - Array of dates in the form YYYY-MM-DD.
- * @property {WeatherValue[]} rain_sum - Array of rainfalls.
- * @property {(WeatherValue | number)[]} apparent_temperature_mean - Array of apparent temperatures.
- */
-
-/**
+ * @property {string[]} rain_sum - Array of rainfalls.
+ * @property {string[]} apparent_temperature_mean - Array of apparent temperatures.
+ * /
+ /**
  * @returns {Promise<DailyWeather>} The book object.
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
@@ -116,5 +100,14 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=apparent_temperature_mean,rain_sum&timezone=auto`
   const response = await fetch(url)
   const { daily } = await response.json()
+
+  // sanitize
+  for (let i = 0; i < daily.time.length; i++) {
+    if (daily.apparent_temperature_mean[i] instanceof Object) {
+      daily.apparent_temperature_mean[i] = daily.apparent_temperature_mean[i].value.slice(0, -1)
+    }
+    daily.rain_sum[i] = daily.rain_sum[i].value.slice(0, -1)
+  }
+
   return daily
 }
