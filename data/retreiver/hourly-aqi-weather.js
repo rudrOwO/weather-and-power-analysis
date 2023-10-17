@@ -22,6 +22,22 @@ export const retreiveHourlyAQI = async (area, fromDate, toDate) => {
 }
 
 /**
+ * @typedef {{time: string[], apparent_temperature: number[], rain: number[]}} HourlyWeather
+ * @returns {Promise<HourlyWeather >}
+ */
+export const retreiveHourlyWeather = async (area, fromDate, toDate) => {
+  fromDate = reformatDate(fromDate)
+  toDate = reformatDate(toDate)
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=apparent_temperature,rain&timezone=auto`
+  const response = await fetch(url)
+
+  console.log("Open Meteo Weather API response status: ", response.status)
+
+  const { hourly } = await response.json()
+  return hourly
+}
+
+/**
  * @typedef {Object} Record
  * @property {string} date
  * @property {string} demand
