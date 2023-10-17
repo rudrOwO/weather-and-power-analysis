@@ -40,19 +40,23 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
 
 /**
  * @typedef {Object} DailyWeather - Represents daily weather statistics.
- * @property {string[]} time  
+ * @property {string[]} time
  * @property {number[]} rain_sum - Rainfall in mm
  * @property {number[]} temperature_2m_mean  - Mean temperature in degree celcius
  * @property {number[]} relativehumidity_2m - Relative humidity in percentage
  * @property {number[]} windspeed_10m - Wind speed in km/h
  * @property {number[]} windspeed_100m - Wind speed in km/h
  * @property {number[]} daytime_length - Daytime length in hours
- * 
- /**
- * @returns {Promise<DailyWeather>} 
+ * @property {number[]} dewpoint_2m - Dew point in degree celcius
+ * @property {number[]} cloudcover - Cloud cover in percentage
+ * @property {number[]} soil_temperature_0_to_7cm - Soil temperature in degree celcius
+ * @property {number[]} mean_apparent_temperature - Apparent temperature in degree celcius
+ */
+/**
+ * @returns {Promise<DailyWeather>}
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
-  const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m,windspeed_10m,dewpoint_2m,cloudcover,soil_temperature_0_to_7cm&daily=sunrise,sunset,temperature_2m_mean,rain_sum&timezone=auto`
+  const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m,windspeed_10m,dewpoint_2m,cloudcover,soil_temperature_0_to_7cm&daily=sunrise,sunset,apparent_temperature_mean,temperature_2m_mean,rain_sum&timezone=auto`
   const weatherResponse = await fetch(weatherURL)
   const weather = await weatherResponse.json()
 
@@ -111,6 +115,7 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
     time: weather.daily.time,
     rain_sum: weather.daily.rain_sum,
     temperature_2m_mean: weather.daily.temperature_2m_mean,
+    mean_apparent_temperature: weather.daily.apparent_temperature_mean,
     relativehumidity_2m: dailyHumidity,
     windspeed_10m: dailyWindspeed_10m,
     windspeed_100m: dailyWindspeed_100m,
