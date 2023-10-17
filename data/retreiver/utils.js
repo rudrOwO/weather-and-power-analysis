@@ -1,4 +1,53 @@
-import { namesToAreaCodes } from "./weather-power.js"
+export const namesToAreaCodes = {
+  dhaka: "1",
+  chittagong: "2",
+  khulna: "3",
+  rajshahi: "4",
+  comilla: "5",
+  mymensingh: "6",
+  sylhet: "7",
+  barisal: "8",
+  rangpur: "9",
+}
+
+export const coordinates = {
+  dhaka: {
+    latitute: 23.7104,
+    longitude: 90.4074,
+  },
+  chittagong: {
+    latitute: 22.3384,
+    longitude: 91.8317,
+  },
+  khulna: {
+    latitute: 22.8098,
+    longitude: 89.5644,
+  },
+  rajshahi: {
+    latitute: 24.374,
+    longitude: 88.6011,
+  },
+  comilla: {
+    latitute: 23.4619,
+    longitude: 91.185,
+  },
+  mymensingh: {
+    latitute: 24.7564,
+    longitude: 90.4065,
+  },
+  sylhet: {
+    latitute: 24.899,
+    longitude: 91.872,
+  },
+  barisal: {
+    latitute: 22.705,
+    longitude: 90.3701,
+  },
+  rangpur: {
+    latitute: 25.7466,
+    longitude: 89.2517,
+  },
+}
 
 export const reformatDate = (date) => {
   const [day, month, year] = date.split("/")
@@ -6,11 +55,7 @@ export const reformatDate = (date) => {
 }
 
 export const guardAgainstInvalidInputs = (area, fromDate, toDate) => {
-  if (
-    area === undefined ||
-    fromDate === undefined ||
-    toDate === undefined
-  ) {
+  if (area === undefined || fromDate === undefined || toDate === undefined) {
     console.error("Usage: node index.js <area> <fromDate> <toDate>")
     console.log("Example: node index.js dhaka 01/01/2013 03/01/2013")
     process.exit(1)
