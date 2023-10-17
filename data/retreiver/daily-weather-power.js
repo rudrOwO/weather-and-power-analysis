@@ -14,8 +14,8 @@ guardAgainstInvalidInputs(area, fromDate, toDate)
 export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   const payload = new FormData()
   payload.append("area", namesToAreaCodes[area])
-  payload.append("from_date", fromDate)
-  payload.append("to_date", toDate)
+  payload.append("from_date", reformatDate["yyyy-mm-dd to dd/mm/yyyy"](fromDate))
+  payload.append("to_date", reformatDate["yyyy-mm-dd to dd/mm/yyyy"](toDate))
 
   const response = await fetch("http://119.40.95.168/bpdb/index.php/area_wise_demand_search", {
     method: "POST",
@@ -29,7 +29,9 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   const records = []
 
   for (let i = 3; i < tableData.length; i += 7) {
-    const date = reformatDate(tableData[i].textContent.substring(24, 34))
+    const date = reformatDate["dd/mm/yyyy to yyyy-mm-dd"](
+      tableData[i].textContent.substring(24, 34)
+    )
     const demand = tableData[i + 2].textContent
     const loadShed = tableData[i + 3].textContent
 
@@ -50,8 +52,6 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
  * @returns {Promise<DailyWeather>} The book object.
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
-  fromDate = reformatDate(fromDate)
-  toDate = reformatDate(toDate)
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=apparent_temperature_mean,rain_sum&timezone=auto`
   const response = await fetch(url)
 
@@ -98,10 +98,7 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
     return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.apparent_temperature}\n`
   })
   const csv = header + rows.join("")
-  writeFileSync(
-    `../daily-weather-power/${area}/${reformatDate(fromDate)}-${reformatDate(toDate)}.csv`,
-    csv
-  )
+  writeFileSync(`../daily-weather-power/${area}/${fromDate}-${toDate}.csv`, csv)
 }
 
 combineWeatherWithPower(area, fromDate, toDate)

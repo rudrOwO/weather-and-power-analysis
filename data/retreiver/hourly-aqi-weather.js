@@ -1,5 +1,5 @@
 import { writeFileSync } from "fs"
-import { guardAgainstInvalidInputs, reformatDate } from "./utils.js"
+import { guardAgainstInvalidInputs } from "./utils.js"
 import { coordinates } from "./utils.js"
 
 const [_, __, area, fromDate, toDate] = process.argv
@@ -10,8 +10,6 @@ guardAgainstInvalidInputs(area, fromDate, toDate)
  * @returns {Promise<HourlyAQI>}
  */
 export const retreiveHourlyAQI = async (area, fromDate, toDate) => {
-  fromDate = reformatDate(fromDate)
-  toDate = reformatDate(toDate)
   const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=us_aqi&timezone=auto`
   const response = await fetch(url)
 
@@ -26,8 +24,6 @@ export const retreiveHourlyAQI = async (area, fromDate, toDate) => {
  * @returns {Promise<HourlyWeather >}
  */
 export const retreiveHourlyWeather = async (area, fromDate, toDate) => {
-  fromDate = reformatDate(fromDate)
-  toDate = reformatDate(toDate)
   const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=apparent_temperature,rain&timezone=auto`
   const response = await fetch(url)
 
@@ -60,10 +56,7 @@ const combineWeatherWithAQI = async (area, fromDate, toDate) => {
     return `${record.time},${record.apparent_temperature},${record.rain},${record.us_aqi}\n`
   })
   const csv = header + rows.join("")
-  writeFileSync(
-    `../hourly-aqi-weather/${area}/${reformatDate(fromDate)}-${reformatDate(toDate)}.csv`,
-    csv
-  )
+  writeFileSync(`../hourly-aqi-weather/${area}/${fromDate}-${toDate}.csv`, csv)
 }
 
 combineWeatherWithAQI(area, fromDate, toDate)
