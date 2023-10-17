@@ -1,9 +1,25 @@
 import { writeFileSync } from "fs"
 import { guardAgainstInvalidInputs, reformatDate } from "./utils.js"
-import { retreiveDailyPowerStats, retreiveDailyWeather } from "./weather-power.js"
+import { coordinates } from "./utils.js"
 
 const [_, __, area, fromDate, toDate] = process.argv
 guardAgainstInvalidInputs(area, fromDate, toDate)
+
+/**
+ * @typedef {{time: string[], us_aqi: number[]}} HourlyAQI
+ * @returns {Promise<HourlyAQI>}
+ */
+export const retreiveHourlyAQI = async (area, fromDate, toDate) => {
+  fromDate = reformatDate(fromDate)
+  toDate = reformatDate(toDate)
+  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=us_aqi&timezone=auto`
+  const response = await fetch(url)
+
+  console.log("Open Meteo Air Quality API response status: ", response.status)
+
+  const { hourly } = await response.json()
+  return hourly
+}
 
 /**
  * @typedef {Object} Record
@@ -28,6 +44,7 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
   const combinedRecords = new Array(len)
 
   for (let i = 0, j = 0; i < len; i++) {
+    // Handling missing records in Power dataset
     if (powerStats[j].date === weatherStats.time[i]) {
       combinedRecords[i] = {
         date: weatherStats.time[i],

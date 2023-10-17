@@ -1,56 +1,10 @@
 import { parse } from "node-html-parser"
-import { reformatDate } from "./utils.js"
+import { writeFileSync } from "fs"
+import { guardAgainstInvalidInputs, reformatDate } from "./utils.js"
+import { namesToAreaCodes, coordinates } from "./utils.js"
 
-export const namesToAreaCodes = {
-  dhaka: "1",
-  chittagong: "2",
-  khulna: "3",
-  rajshahi: "4",
-  comilla: "5",
-  mymensingh: "6",
-  sylhet: "7",
-  barisal: "8",
-  rangpur: "9",
-}
-
-export const coordinates = {
-  dhaka: {
-    latitute: 23.7104,
-    longitude: 90.4074,
-  },
-  chittagong: {
-    latitute: 22.3384,
-    longitude: 91.8317,
-  },
-  khulna: {
-    latitute: 22.8098,
-    longitude: 89.5644,
-  },
-  rajshahi: {
-    latitute: 24.374,
-    longitude: 88.6011,
-  },
-  comilla: {
-    latitute: 23.4619,
-    longitude: 91.185,
-  },
-  mymensingh: {
-    latitute: 24.7564,
-    longitude: 90.4065,
-  },
-  sylhet: {
-    latitute: 24.899,
-    longitude: 91.872,
-  },
-  barisal: {
-    latitute: 22.705,
-    longitude: 90.3701,
-  },
-  rangpur: {
-    latitute: 25.7466,
-    longitude: 89.2517,
-  },
-}
+const [_, __, area, fromDate, toDate] = process.argv
+guardAgainstInvalidInputs(area, fromDate, toDate)
 
 /**
  * Represents daily power statistics.
@@ -106,3 +60,61 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
   const { daily } = await response.json()
   return daily
 }
+
+/**
+ * @typedef {Object} Record
+ * @property {string} date
+ * @property {string} demand
+ * @property {string} loadShed
+ * @property {string} rainfall
+ * @property {string} apparent_temperature
+ */
+/**
+ * @param {string} fromDate is in the format DD/MM/YYYY.
+ * @param {string} toDate is in the format DD/MM/YYYY.
+ * @returns {Promise<Record[]>} The combined records.
+ */
+const combineWeatherWithPower = async (area, fromDate, toDate) => {
+  const [powerStats, weatherStats] = await Promise.all([
+    retreiveDailyPowerStats(area, fromDate, toDate),
+    retreiveDailyWeather(area, fromDate, toDate),
+  ])
+
+  const len = weatherStats.time.length
+  const combinedRecords = new Array(len)
+
+  for (let i = 0, j = 0; i < len; i++) {
+    // Handling missing records in Power dataset
+    if (powerStats[j].date === weatherStats.time[i]) {
+      combinedRecords[i] = {
+        date: weatherStats.time[i],
+        demand: powerStats[j].demand,
+        loadShed: powerStats[j].loadShed,
+        rainfall: weatherStats.rain_sum[i],
+        apparent_temperature: weatherStats.apparent_temperature_mean[i],
+      }
+      j++
+    } else {
+      console.log("Missing power stats for: ", weatherStats.time[i])
+      combinedRecords[i] = {
+        date: weatherStats.time[i],
+        demand: "",
+        loadShed: "",
+        rainfall: weatherStats.rain_sum[i],
+        apparent_temperature: weatherStats.apparent_temperature_mean[i],
+      }
+    }
+  }
+
+  const header = "date,power_demand,load_shed,rainfall,mean_apparent_temperature\n"
+  const rows = combinedRecords.map((record) => {
+    return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.apparent_temperature}\n`
+  })
+  const csv = header + rows.join("")
+  writeFileSync(
+    `../daily-weather-power/${area}/${reformatDate(fromDate)}-${reformatDate(toDate)}.csv`,
+    csv
+  )
+}
+
+combineWeatherWithPower(area, fromDate, toDate)
