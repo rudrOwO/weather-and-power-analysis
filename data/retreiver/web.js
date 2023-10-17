@@ -40,18 +40,18 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
 
 /**
  * @typedef {Object} DailyWeather - Represents daily weather statistics.
- * @property {string[]} time 
- * @property {number[]} rain_sum 
- * @property {number[]} temperature_2m_mean 
- * @property {number[]} us_aqi 
- * @property {number[]} relativehumidity_2m 
- * @property {number[]} windspeed_100m 
+ * @property {string[]} time  
+ * @property {number[]} rain_sum - Rainfall in mm
+ * @property {number[]} temperature_2m_mean  - Mean temperature in degree celcius
+ * @property {number[]} relativehumidity_2m - Relative humidity in percentage
+ * @property {number[]} windspeed_100m - Wind speed in km/h
+ * @property {number[]} daytime_length - Daytime length in hours
  * 
  /**
  * @returns {Promise<DailyWeather>} 
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
-  const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m&daily=temperature_2m_mean,rain_sum&timezone=auto`
+  const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m&daily=sunrise,sunset,temperature_2m_mean,rain_sum&timezone=auto`
   const weatherResponse = await fetch(weatherURL)
   const weather = await weatherResponse.json()
 
@@ -59,11 +59,16 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
 
   const dailyHumidity = new Array(weather.daily.time.length)
   const dailyWindspeed = new Array(weather.daily.time.length)
+  const daytimeLength = new Array(weather.daily.time.length)
 
   const len = weather.hourly.time.length
 
   for (let i = 0, humidiy = 0, windSpeed = 0; i < len; i++) {
     if (i % 24 === 0) {
+      const morning = weather.daily.sunrise[i / 24]
+      const evening = weather.daily.sunset[i / 24]
+      daytimeLength[i / 24] = (new Date(evening) - new Date(morning)) / 3600000
+
       dailyHumidity[i / 24] = humidiy / 24
       dailyWindspeed[i / 24] = windSpeed / 24
       humidiy = 0
@@ -79,5 +84,6 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
     temperature_2m_mean: weather.daily.temperature_2m_mean,
     relativehumidity_2m: dailyHumidity,
     windspeed_100m: dailyWindspeed,
+    daytime_length: daytimeLength,
   }
 }
