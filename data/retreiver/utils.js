@@ -49,20 +49,39 @@ export const coordinates = {
   },
 }
 
-export const reformatDate = (date) => {
-  const [day, month, year] = date.split("/")
-  return `${year}-${month}-${day}`
+export const reformatDate = {
+  "yyyy-mm-dd to dd/mm/yyyy": (date) => {
+    const [year, month, day] = date.split("-")
+    return `${day}/${month}/${year}`
+  },
+
+  "dd/mm/yyyy to yyyy-mm-dd": (date) => {
+    const [day, month, year] = date.split("/")
+    return `${year}-${month}-${day}`
+  },
 }
 
 export const guardAgainstInvalidInputs = (area, fromDate, toDate) => {
   if (area === undefined || fromDate === undefined || toDate === undefined) {
-    console.error("Usage: node index.js <area> <fromDate> <toDate>")
-    console.log("Example: node index.js dhaka 01/01/2013 03/01/2013")
+    console.error("Usage: node script.js <area> <starting date> <ending date>")
+    console.log("Example: node script.js dhaka 2016-01-01 2016-12-31")
     process.exit(1)
   }
 
   if (namesToAreaCodes[area] === undefined) {
     console.error("Invalid area name")
+    process.exit(1)
+  }
+
+  const regex = /^\d{4}-\d{2}-\d{2}$/
+
+  if (!regex.test(fromDate) || !regex.test(toDate)) {
+    console.error("Invalid date format: Use YYYY-MM-DD")
+    process.exit(1)
+  }
+
+  if (fromDate > toDate) {
+    console.error("Invalid date range")
     process.exit(1)
   }
 }
