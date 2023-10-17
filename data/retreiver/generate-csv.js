@@ -47,4 +47,7 @@ const generateCombinedCSV = async (area, fromDate, toDate) => {
   writeFileSync(`../csv/${area}/${fromDate}-${toDate}.csv`, csv)
 }
 
+// const test = `﻿﻿<table>\n<tr style="background-color:#595959;color:#fff;border:0px">\n\t\t\t<td width='52.5%'>Area</td>\n\t\t\t<td style='text-align:center'>Demand (MW)</td>\n\t\t\t<td style='text-align:center'>Load Shed (MW)</td>\n</tr>\n</table>\t\t\n`
+// console.log(test.length)
+
 generateCombinedCSV(area, fromDate, toDate)

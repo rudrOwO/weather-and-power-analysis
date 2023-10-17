@@ -5,11 +5,11 @@
   "description": "Data retreival modules for analyzing the impact of rainfall on load shedding and AQI",
   "main": "index.js",
   "scripts": {
-    "dev" : "node ./index.js"
+    "dev": "node ./index.js"
   },
   "author": "Dardaul Hoque <bsse1126@iit.du.ac.bd>",
   "license": "MIT",
   "dependencies": {
-    "node-html-parser": "^6.1.10"
+    "cheerio": "1.0.0-rc.12"
   }
 }

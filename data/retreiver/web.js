@@ -1,4 +1,4 @@
-import { parse } from "node-html-parser"
+import * as cheerio from "cheerio"
 import { reformatDate } from "./utils.js"
 import { namesToAreaCodes, coordinates } from "./utils.js"
 
@@ -21,15 +21,15 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   console.log("Power Board Server response received. Scraping HTML...")
 
   const html = await response.text()
-  const tableData = parse(html).getElementsByTagName("td")
+  const $ = cheerio.load("<table>" + html.substring(221) + "</table>")
+  const $td = $("td")
+
   const records = []
 
-  for (let i = 3; i < tableData.length; i += 7) {
-    const date = reformatDate["dd/mm/yyyy to yyyy-mm-dd"](
-      tableData[i].textContent.substring(24, 34)
-    )
-    const demand = tableData[i + 2].textContent
-    const loadShed = tableData[i + 3].textContent
+  for (let i = 0; i < $td.length; i += 7) {
+    const date = reformatDate["dd/mm/yyyy to yyyy-mm-dd"]($td[i].children[0].data.substring(24, 34))
+    const demand = $td[i + 2].children[0].data
+    const loadShed = $td[i + 3].children[0].data
 
     records.push({ date, demand, loadShed })
   }
