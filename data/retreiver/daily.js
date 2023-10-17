@@ -46,13 +46,13 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
  * @typedef {Object} DailyWeather - Represents daily rainfall statistics.
  * @property {string[]} time - Array of dates in the form YYYY-MM-DD.
  * @property {string[]} rain_sum - Array of rainfalls.
- * @property {string[]} apparent_temperature_mean - Array of apparent temperatures.
+ * @property {string[]} temperature_2m_mean - Array of mean temperatures.
  * /
  /**
  * @returns {Promise<DailyWeather>} The book object.
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=apparent_temperature_mean,rain_sum&timezone=auto`
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&daily=temperature_2m_mean,rain_sum&timezone=auto`
   const response = await fetch(url)
 
   console.log("Open Meteo API response status: ", response.status)
@@ -78,7 +78,7 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
         demand: powerStats[j].demand,
         loadShed: powerStats[j].loadShed,
         rainfall: weatherStats.rain_sum[i],
-        apparent_temperature: weatherStats.apparent_temperature_mean[i],
+        mean_temperature: weatherStats.temperature_2m_mean[i],
       }
       j++
     } else {
@@ -88,14 +88,14 @@ const combineWeatherWithPower = async (area, fromDate, toDate) => {
         demand: "",
         loadShed: "",
         rainfall: weatherStats.rain_sum[i],
-        apparent_temperature: weatherStats.apparent_temperature_mean[i],
+        mean_temperature: weatherStats.temperature_2m_mean[i],
       }
     }
   }
 
-  const header = "date,power_demand,load_shed,rainfall,mean_apparent_temperature\n"
+  const header = "date,power_demand,load_shed,rainfall,mean_temperature\n"
   const rows = combinedRecords.map((record) => {
-    return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.apparent_temperature}\n`
+    return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.mean_temperature}\n`
   })
   const csv = header + rows.join("")
   writeFileSync(`../daily-weather-power/${area}/${fromDate}-${toDate}.csv`, csv)

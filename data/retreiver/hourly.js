@@ -30,6 +30,9 @@ export const retreiveHourlyWeather = async (area, fromDate, toDate) => {
   console.log("Open Meteo Weather API response status: ", response.status)
 
   const { hourly } = await response.json()
+
+  // TODO Convert to daily before returning
+
   return hourly
 }
 
