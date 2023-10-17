@@ -32,16 +32,15 @@ const generateCombinedCSV = async (area, fromDate, toDate) => {
       loadShed,
       rainfall: weatherStats.rain_sum[i],
       mean_temperature: weatherStats.temperature_2m_mean[i],
-      us_aqi: weatherStats.us_aqi[i],
       relativehumidity_2m: weatherStats.relativehumidity_2m[i],
       windspeed_100m: weatherStats.windspeed_100m[i],
     }
   }
 
   const header =
-    "date,power_demand,load_shed,rainfall,mean_temperature,us_aqi,relativehumidity_2m,winddirection_100m\n"
+    "date,power_demand,load_shed,rainfall,mean_temperature,relativehumidity_2m,windspeed_100m\n"
   const rows = combinedRecords.map((record) => {
-    return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.mean_temperature},${record.us_aqi},${record.relativehumidity_2m},${record.windspeed_100m}\n`
+    return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.mean_temperature},${record.relativehumidity_2m},${record.windspeed_100m}\n`
   })
   const csv = header + rows.join("")
   writeFileSync(`../csv/${area}/${fromDate}-${toDate}.csv`, csv)

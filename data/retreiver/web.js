@@ -18,7 +18,7 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
     body: payload,
   })
 
-  console.log("Power Board Server response received")
+  console.log("Power Board Server response received. Scraping HTML...")
 
   const html = await response.text()
   const tableData = parse(html).getElementsByTagName("td")
@@ -51,33 +51,24 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
  * @returns {Promise<DailyWeather>} 
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
-  const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m,winddirection_100m&daily=temperature_2m_mean,rain_sum&timezone=auto`
-  const airQualityURL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=us_aqi&timezone=auto`
-  const [weatherResponse, airQualityResponse] = await Promise.all([
-    fetch(weatherURL),
-    fetch(airQualityURL),
-  ])
+  const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m&daily=temperature_2m_mean,rain_sum&timezone=auto`
+  const weatherResponse = await fetch(weatherURL)
   const weather = await weatherResponse.json()
-  const airQuality = await airQualityResponse.json()
 
   console.log("Open Meteo API response received")
 
-  const dailyAirQuality = new Array(weather.daily.time.length)
   const dailyHumidity = new Array(weather.daily.time.length)
   const dailyWindspeed = new Array(weather.daily.time.length)
 
   const len = weather.hourly.time.length
 
-  for (let i = 0, aqi = 0, humidiy = 0, windSpeed = 0; i < len; i++) {
+  for (let i = 0, humidiy = 0, windSpeed = 0; i < len; i++) {
     if (i % 24 === 0) {
-      dailyAirQuality[i / 24] = aqi / 24
       dailyHumidity[i / 24] = humidiy / 24
       dailyWindspeed[i / 24] = windSpeed / 24
-      aqi = 0
       humidiy = 0
       windSpeed = 0
     }
-    aqi += airQuality.hourly.us_aqi[i]
     humidiy += weather.hourly.relativehumidity_2m[i]
     windSpeed += weather.hourly.windspeed_100m[i]
   }
@@ -86,7 +77,6 @@ export const retreiveDailyWeather = async (area, fromDate, toDate) => {
     time: weather.daily.time,
     rain_sum: weather.daily.rain_sum,
     temperature_2m_mean: weather.daily.temperature_2m_mean,
-    us_aqi: dailyAirQuality,
     relativehumidity_2m: dailyHumidity,
     windspeed_100m: dailyWindspeed,
   }
