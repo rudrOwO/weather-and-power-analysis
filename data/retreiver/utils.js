@@ -72,4 +72,16 @@ export const guardAgainstInvalidInputs = (area, fromDate, toDate) => {
     console.error("Invalid area name")
     process.exit(1)
   }
+
+  const regex = /^\d{4}-\d{2}-\d{2}$/
+
+  if (!regex.test(fromDate) || !regex.test(toDate)) {
+    console.error("Invalid date format: Use YYYY-MM-DD")
+    process.exit(1)
+  }
+
+  if (fromDate > toDate) {
+    console.error("Invalid date range")
+    process.exit(1)
+  }
 }
