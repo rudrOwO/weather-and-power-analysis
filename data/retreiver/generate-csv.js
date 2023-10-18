@@ -44,10 +44,14 @@ const generateCombinedCSV = async (area, fromDate, toDate) => {
     return `${record.date},${record.demand},${record.loadShed},${record.rainfall},${record.mean_temperature},${record.mean_apparent_temperature},${record.relativehumidity_2m},${record.windspeed_10m},${record.windspeed_100m},${record.daytime_length},${record.dewpoint_2m},${record.cloudcover},${record.soil_temperature_0_to_7cm}\n`
   })
   const csv = header + rows.join("")
-  writeFileSync(`../csv/${area}/${fromDate}-${toDate}.csv`, csv)
-}
 
-// const test = `﻿﻿<table>\n<tr style="background-color:#595959;color:#fff;border:0px">\n\t\t\t<td width='52.5%'>Area</td>\n\t\t\t<td style='text-align:center'>Demand (MW)</td>\n\t\t\t<td style='text-align:center'>Load Shed (MW)</td>\n</tr>\n</table>\t\t\n`
-// console.log(test.length)
+  try {
+    writeFileSync(`../csv/${area}/${fromDate}-${toDate}.csv`, csv)
+    console.log(`csv written to ../csv/${area}/${fromDate}-${toDate}.csv`)
+  } catch (e) {
+    console.error("Error writing to csv file: ", e)
+    process.exit(1)
+  }
+}
 
 generateCombinedCSV(area, fromDate, toDate)

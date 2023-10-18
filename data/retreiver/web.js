@@ -16,6 +16,9 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
   const response = await fetch("http://119.40.95.168/bpdb/index.php/area_wise_demand_search", {
     method: "POST",
     body: payload,
+  }).catch((e) => {
+    console.error("Error fetching data from Power Board Server: ", e)
+    process.exit(1)
   })
 
   console.log("Power Board Server response received. Scraping HTML...")
@@ -57,11 +60,14 @@ export const retreiveDailyPowerStats = async (area, fromDate, toDate) => {
  */
 export const retreiveDailyWeather = async (area, fromDate, toDate) => {
   const weatherURL = `https://archive-api.open-meteo.com/v1/archive?latitude=${coordinates[area].latitute}&longitude=${coordinates[area].longitude}&start_date=${fromDate}&end_date=${toDate}&hourly=relativehumidity_2m,windspeed_100m,windspeed_10m,dewpoint_2m,cloudcover,soil_temperature_0_to_7cm&daily=sunrise,sunset,apparent_temperature_mean,temperature_2m_mean,rain_sum&timezone=auto`
-  const weatherResponse = await fetch(weatherURL)
-  const weather = await weatherResponse.json()
+  const weatherResponse = await fetch(weatherURL).catch((e) => {
+    console.error("Error fetching data from Open Meteo API: ", e)
+    process.exit(1)
+  })
 
   console.log("Open Meteo API response received")
 
+  const weather = await weatherResponse.json()
   const dailyHumidity = new Array(weather.daily.time.length)
   const dailyWindspeed_100m = new Array(weather.daily.time.length)
   const dailyWindspeed_10m = new Array(weather.daily.time.length)
