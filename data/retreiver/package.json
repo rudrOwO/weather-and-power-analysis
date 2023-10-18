@@ -1,11 +1,11 @@
 {
   "name": "retreiver",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
-  "description": "Data retreival modules for analyzing the impact of rainfall on load shedding and AQI",
+  "description": "Data retreival modules for correlating weather variables with power demand in different Bangladeshi divisions",
   "main": "index.js",
   "scripts": {
-    "dev": "node ./index.js"
+    "csv": "node ./generate-csv.js"
   },
   "author": "Dardaul Hoque <bsse1126@iit.du.ac.bd>",
   "license": "MIT",
